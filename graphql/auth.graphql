@@ -1,0 +1,45 @@
+extend type Query @guard{
+    "Get authenticated user information."
+    me: User! @auth
+}
+
+extend type Mutation {
+    "Authenticate a user."
+    login(input: LoginInput!): LoginResponse!
+    "Sign out of a user."
+    logout: LogoutResponse! @guard
+    "Refresh the access token."
+    refreshToken: AccessToken! @guard
+}
+
+type LoginResponse {
+    accessToken: AccessToken! @rename(attribute: "access_token")
+    user: User!
+}
+
+type AccessToken {
+    token: String!
+    expires_at: DateTime!
+    type: String!
+}
+
+type LogoutResponse {
+    message: String!
+    user: User!
+}
+
+input LoginInput {
+  email: String @rules(
+        apply: ["bail", "required", "email"]
+        messages: [
+        {
+            rule: "required"
+            message: "The email is required."
+        }
+        {
+            rule: "email"
+            message: "The email must be a valid email address."
+        }
+    ])
+  password: String @rules(apply: ["bail", "required"])
+}
